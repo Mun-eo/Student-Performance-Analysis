@@ -1,17 +1,12 @@
 # Student Performance Analysis
 
-This project utilizes performance data on exam results for students in grades 9 through 12. 
+This project utilizes performance data on exam results for students in grades 9 through 12 to uncover relationships between academic behavior and exam scores
 
-### Business challenge:
-Where is attrition happening within synthetix solutions and what demographics are contributing to the attrition? 
-
-**Insights needed to answer the business challenge**
-1. What is the attrition and retention rate within Synthetix Solutions?
-2. What is the attrition spread among the departments within Synthetix Solutions?
-3. Which gender has higher attrition?
-4. What job roles are affected by attrition?
-5. What year is attrition occuring in the most among these job roles?
-6. What are the potential casues of the attrition within the high risk job roles?
+**Insights to uncover**
+1. Is there a correlation between attendance and exam scores?
+2. Is there a correlation between study hours per day and exam scores?
+3. Is there a correlation between learning method and exam scores?
+4. Is there a correlation between smartphone usage and exam scores?
 
 <h2>Understanding the dataset:</h2>
 
