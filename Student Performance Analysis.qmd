@@ -1,73 +1,84 @@
-# *======================================================================*
-# STUDENT PERFORMANCE ANALYSIS ----
-# Purpose: Frank Johnson High school wants to understand how variables 
-#          such as "Study Hours", "Smartphone usage", "Subject", and 
-#          "Learning Method affects the exam scores of their students. 
-#          This would help the school determine what interventions or 
-#          programs they should develop to continue support their students'
-#          development.
-#
-#
-# Variables examined:
-#   Study Hours/Day             - The amount of study hours per student
-#   Attendance %                - Attendance percentage per student
-#   Exam Score                  - General exam scores per student (Doesn't specify a subject) 
-#   Favorite subject            - Students favorite subjects   
-#   Smartphone Usage            - The amount of hours students use their smartphones
-#   Learning Method             - The method students attend school (e.g. Hybrid, On-site, Online)
-#
-# Analysis Goals:
-# 1. Is there a relationship between smart phone usage and student exam scores? (Correlation Test)
-# 2. Is there a significant mean difference in exam scores between STEM & Non-STEM Majors? (T-Test)
-# 3. Can attendance predict student exam scores? (Linear Regression)
-# 4. Do students who learn On-site perform better on exams than students who are online? (T-Test)
-#
-# Hypotheses:
-# H1: There will be a strong negative relationship between student smart phone usage and student exam scores.
-# H2: Students in STEM Majors will have a significantly higher mean in exam scores 
-# compared to Non-STEM Majors.
-# H3: Student attendance will be a strong positive predictor of student exam scores.
-# H4: Students who attend school in person will have a significantly higher mean in exam scores
-# compared to students who learn online
-# *======================================================================*
+---
+title: "Student Performance Analysis"
+author: "Rasheed Johnson"
+format: 
+  html:
+    theme: flatly
+    toc: true
+    toc-location: left
+execute:
+  warning: false
+  message: false
+---
 
+## Purpose
 
+Frank Johnson High School wants to understand how variables such as "Study Hours", "Smartphone usage", "Subject", and "Learning Method" affect the exam scores of their students. This would help the school determine what interventions or programs they should develop to continue supporting their students' development.
 
-# 1. INSTALL & LOAD PACKAGES -----------------------------------
-# Run the install lines once if the packages aren't already on your machine.
-# install.packages(c("tidyverse", "stats", "effectsize", "ggtext", "ggthemes"))
-my_packages <- c("tidyverse", "stats", "effectsize", "ggtext", "ggthemes")
+## Variables Examined
+
+-   **Study Hours/Day:** The amount of study hours per student
+-   **Attendance %:** Attendance percentage per student
+-   **Exam Score:** General exam scores per student (Doesn't specify a subject)
+-   **Favorite Subject:** Students' favorite subjects\
+-   **Smartphone Usage:** The amount of hours students use their smartphones
+-   **Learning Method:** The method students attend school (e.g., Hybrid, On-site, Online)
+
+## Analysis Goals
+
+1.  Is there a relationship between smartphone usage and student exam scores? (Correlation Test)
+2.  Is there a significant mean difference in exam scores between STEM & Non-STEM Majors? (T-Test)
+3.  Can attendance predict student exam scores? (Linear Regression)
+4.  Do students who learn On-site perform better on exams than students who are online? (T-Test)
+
+## Hypotheses
+
+-   **H1:** There will be a strong negative relationship between student smartphone usage and student exam scores.
+-   **H2:** Students in STEM Majors will have a significantly higher mean in exam scores compared to Non-STEM Majors.
+-   **H3:** Student attendance will be a strong positive predictor of student exam scores.
+-   **H4:** Students who attend school in person will have a significantly higher mean in exam scores compared to students who learn online.
+
+# 1. INSTALL & LOAD PACKAGES
+
+```{r}
+#| echo: true
+#| warning: false
+#| message: false
+#| output: false
+my_packages <- c("tidyverse", "stats", "effectsize", "ggtext")
 lapply(my_packages, require, character.only = TRUE)
-# *======================================================================*
+```
 
+# 2. LOAD, VIEW DATA, & CHECK FOR NA'S
 
-# 2. LOAD, VIEW DATA, & CHECK FOR NA'S -----------------------------------
+```{r}
 students_df <- read_csv("education_dataset.csv")
 glimpse(students_df)
 summary(students_df)
+colSums(is.na(students_df))
+```
 
-colSums(is.na(students_df)) 
-# *======================================================================*
+# 3. DATA CLEANING FOR STATISTICAL TEST
 
+## 3.1 Set up for correlation and linear regression test
 
-
-# 3. DATA CLEANING FOR STATISTICAL TEST -----------------------------------
-
-## 3.1 Set up for correlation and linear regression test ====
+```{r}
 relevant_cols <- c("Study Hours/Day", 
                    "Attendance %",
                    "Exam Score",
                    "Favorite Subject",
                    "Smartphone Usage (hrs/day)",
-                   "Learning Method"
-                   )
+                   "Learning Method")
 
 analyzed_students_df <- students_df %>% 
   select(all_of(relevant_cols)) 
+
 glimpse(analyzed_students_df)
+```
 
+## 3.2 Set up for Independent Samples T-Test
 
-## 3.2 Set up for Independent Samples T-Test ====
+```{r}
 analyzed_students_df <- analyzed_students_df %>% 
   mutate(
     Majors = case_when(
@@ -82,7 +93,6 @@ analyzed_students_df <- analyzed_students_df %>%
     )
   )
 
-
 Lmethod_t_test <- analyzed_students_df %>% 
   filter(`Learning Method` %in% c("Online", "Offline")) %>% 
   mutate(
@@ -96,104 +106,94 @@ Lmethod_t_test <- analyzed_students_df %>%
       )
   )
 
-
 # Viewing if sample size is balanced for the t-test
 analyzed_students_df %>% count(Majors) 
 Lmethod_t_test %>% count(Learning_Group)
-# *======================================================================*
+```
 
+# 4. EXPLORATORY DATA ANALYSIS (VISUALIZATIONS)
 
+## 4.1 Visualize the distribution for each single variable being analyzed
 
-# 4. EXPLORATORY DATA ANALYSIS (VISUALIZATIONS) -----------------------------------
-
-## 4.1 Visualize the distribution for each single variable being analyzed ====
-ggplot(analyzed_students_df, aes(x = `Study Hours/Day`)
-       ) + 
+```{r}
+ggplot(analyzed_students_df, aes(x = `Study Hours/Day`)) + 
   geom_histogram(color = "black", fill = "pink")
   
-
-ggplot(analyzed_students_df, aes(x = `Attendance %`)
-       ) +
+ggplot(analyzed_students_df, aes(x = `Attendance %`)) +
   geom_histogram(bins = 40, color = "black", fill = "blue") 
 
-
-ggplot(analyzed_students_df, aes(x = `Exam Score`)
-       ) +
+ggplot(analyzed_students_df, aes(x = `Exam Score`)) +
   geom_histogram(color = "black", fill = "lightblue") 
 
+ggplot(analyzed_students_df, aes(x = `Smartphone Usage (hrs/day)`)) + 
+  geom_histogram(color = "black", fill = "darkred")
+```
 
-ggplot(analyzed_students_df, aes(x = `Smartphone Usage (hrs/day)`)
-       ) + 
-  geom_histogram(color = "black", fill = "darkred") 
-  
+## 4.2 Visualize scatter plots for H1 & H3
 
-## 4.2 Visualize scatter plots for H1 & H3 ====
+```{r}
 ggplot(analyzed_students_df, aes(x = `Smartphone Usage (hrs/day)`,
-                                 y = `Exam Score`)
-       ) +
+                                 y = `Exam Score`)) +
   geom_point(alpha = 0.5, color = "black", size = 2) +
   geom_smooth(method = "lm", color = "red", linewidth = 1, se = TRUE) +
   labs(x = "Students Smart Phone Usage (Hrs)",
        y = "Students Exam Score")
 
-
 ggplot(analyzed_students_df, aes(x = `Attendance %`,
-                                 y = `Exam Score`)
-       ) + 
+                                 y = `Exam Score`)) + 
   geom_point(color = "black", size = 3) + 
   geom_smooth(method = "lm", se = TRUE, linewidth = 1) + 
   labs(x = "Students Attendance",
-       y = "Students Exam Score") 
+       y = "Students Exam Score")
+```
 
+## 4.3 Visualize T-Test for H2 & H4
 
-## 4.3 Visualize T-Test for H2 & H4 ====
+```{r}
 ggplot(analyzed_students_df, aes(x = Majors,
-                                 y = `Exam Score`)
-       ) + 
+                                 y = `Exam Score`)) + 
   geom_boxplot(aes(fill = Majors))
-
 
 ggplot(Lmethod_t_test, aes(x = Learning_Group,
                            y = `Exam Score`)) +
   geom_boxplot()
-# *======================================================================*
+```
 
+# 5. STATISTICAL TEST FOR ANALYSIS
 
+## 5.1 Conduct Correlation Statistical Test
 
-# 5. STATISTICAL TEST FOR ANALYSIS  -----------------------------------
-
-## 5.1 Conduct Correlation Statistical Test ====
+```{r}
 cor.test(analyzed_students_df$`Smartphone Usage (hrs/day)`, 
          analyzed_students_df$`Exam Score`,
          alternative = "less",
          method = "pearson",
          conf.level = 0.95)
-# Finding: While there was a statistically significant finding between student smartphone usage 
-#          & student exam score, the effect size was very low(r = -0.07). Meaning that there 
-#          is no practical important relationship between student smartphone usage & student exam 
-#          score, the significant result can be mostly due to the large sample size 
-#          rather than real world impact.
+```
 
+::: {.callout-note title="Key Finding"}
+While there was a statistically significant finding between student smartphone usage & student exam score, the effect size was very low (*r* = -0.07). Meaning that there is no practical important relationship between student smartphone usage & student exam score, the significant result can be mostly due to the large sample size rather than real world impact.
+:::
 
+## 5.2 Conduct Linear Regression Statistical Test
 
-## 5.2 Conduct Linear Regression Statistical Test ====
+```{r}
 regression_model <- lm(`Exam Score` ~ `Attendance %`,
                        data = analyzed_students_df)
-
 summary(regression_model)
-# Finding: There was not a statistically significant finding between student attendance 
-#          & student exam scores. The predictive strength and direction was found to be 
-#          very weak(b = -0.08). Student attendance could not be used an as a variable 
-#          to predict student exam performance (r2 = 0.00). 
+```
 
+::: {.callout-note title="Key Finding"}
+There was not a statistically significant finding between student attendance & student exam scores. The predictive strength and direction was found to be very weak (*b* = -0.08). Student attendance could not be used as a variable to predict student exam performance (*r2* = 0.00).
+:::
 
+## 5.3 Conduct Independent Sample T-Test Statistical Tests
 
-## 5.3 Conduct Independent Sample T-Test Statistical Tests ====
+```{r}
 t.test(`Exam Score` ~ Majors, 
        var.equal = FALSE, 
        conf.level = 0.95,
        data = analyzed_students_df)
-
 
 descrpitive_stats <- analyzed_students_df %>% 
   group_by(Majors) %>% 
@@ -206,24 +206,21 @@ descrpitive_stats <- analyzed_students_df %>%
 mean_difference <- descrpitive_stats[2, 2] - descrpitive_stats[1, 2]
 cohens_d <- cohens_d(`Exam Score` ~ Majors, 
                      data = analyzed_students_df)
-# Assesses the effect size to gauge how importance of the significant finding
-
 
 descrpitive_stats
 mean_difference
 cohens_d
-# Finding: There was a statistically significant mean difference in exam scores 
-#          between STEM & Non-STEM majors (p < 0.05). Although STEM majors scored 
-#          an average of 4.31 points higher in exam scores compared to 
-#          Non-STEM majors, the effect size was small (d = 0.23). This means that 
-#          the difference in exam scores between both groups overlap a lot.
+```
 
+::: {.callout-note title="Key Finding"}
+There was a statistically significant mean difference in exam scores between STEM & Non-STEM majors (p \< 0.05). Although STEM majors scored an average of 4.31 points higher in exam scores compared to Non-STEM majors, the effect size was small (*d* = 0.23). This means that the difference in exam scores between both groups overlap a lot.
+:::
 
+```{r}
 t.test(`Exam Score` ~ Learning_Group,
        var.equal = FALSE,
        data = Lmethod_t_test,
        conf.level = 0.95)
-
 
 lm_descrpitive_stats <- Lmethod_t_test %>% 
   group_by(Learning_Group) %>% 
@@ -237,22 +234,20 @@ lm_mean_difference <- lm_descrpitive_stats[2, 2] - lm_descrpitive_stats[1, 2]
 lm_cohen_d <- cohens_d(`Exam Score` ~ Learning_Group,
          data = Lmethod_t_test)
 
-
 lm_descrpitive_stats
 lm_mean_difference
 lm_cohen_d
-# Finding: There was not a statistically significant mean difference in exam score 
-#          between Online & On-Site students (p > 0.09). Although the Onsite students 
-#          scored an average of 3.63 points higher in exam score compared to Online students,
-#          the effect size was small. Implying that the difference in exam scores between 
-#          both groups over lap.
-# *======================================================================*
+```
 
+::: {.callout-note title="Key Finding"}
+There was not a statistically significant mean difference in exam score between Online & On-Site students (p \> 0.09). Although the Onsite students scored an average of 3.63 points higher in exam score compared to Online students, the effect size was small. Implying that the difference in exam scores between both groups overlap.
+:::
 
+# 6. FINAL VISUALIZATIONS
 
-# 6. FINAL VISUALIZATIONS   -----------------------------------
+## 6.1 Correlation visualization of student smart phone usage and exam score
 
-## 6.1 Correlation visualization of student smart phone usage and exam score ====
+```{r}
 ggplot(analyzed_students_df, aes(x = `Smartphone Usage (hrs/day)`,
                                  y = `Exam Score`)
        ) +
@@ -272,9 +267,11 @@ ggplot(analyzed_students_df, aes(x = `Smartphone Usage (hrs/day)`,
     axis.title = element_text(size = 11),
     axis.line = element_line(linetype = "dashed"),
     axis.text = element_text(size = 10)) 
+```
 
+## 6.2 Linear regression visualization of student attendance and exam scores
 
-## 6.2 Linear regression visualization of student attendance and exam scores ====
+```{r}
 ggplot(analyzed_students_df, aes(x = `Attendance %`, y = `Exam Score`)
        ) +
   geom_jitter(width = 0.5, height = 0.5, alpha = 0.5, color = "black") +
@@ -289,9 +286,11 @@ ggplot(analyzed_students_df, aes(x = `Attendance %`, y = `Exam Score`)
         panel.grid.minor = element_blank(),
         axis.text = element_text(size = 10),
         axis.line = element_line()) 
+```
 
+## 6.3 Independent samples t-test visualization (STEM & Non-STEM Majors)
 
-## 6.3 Independent samples t-test visualization (STEM & Non-STEM Majors) ====
+```{r}
 ggplot(analyzed_students_df, aes(x = Majors, y = `Exam Score`)
        ) +
   geom_boxplot( aes( fill = Majors)) +
@@ -305,9 +304,11 @@ ggplot(analyzed_students_df, aes(x = Majors, y = `Exam Score`)
         panel.grid.minor = element_blank(),
         axis.line = element_line(linetype = "dashed"),
         axis.text = element_text(size = 10))
+```
 
+## 6.4 Independent samples t-test visualization (Online & Onsite Students)
 
-## 6.4 Independent samples t-test visualization (Online & Onsite Students) ====
+```{r}
 ggplot(Lmethod_t_test, aes(x = Learning_Group, y = `Exam Score`)
        ) +
   geom_boxplot(aes(fill = Learning_Group)) +
@@ -321,11 +322,10 @@ ggplot(Lmethod_t_test, aes(x = Learning_Group, y = `Exam Score`)
         axis.line = element_line(linetype = "dashed"),
         axis.text = element_text(size = 10)
   )
+```
 
-There was not a statistically significant mean difference in exam score 
-#          between Online & On-Site students (p > 0.09). Although the Onsite students 
-#          scored an average of 3.63 points higher in exam score compared to Online students,
-#          the effect size was small. Implying that the difference in exam scores between 
-#          both groups over lap.
+# 7. Conclusions
 
-
+::: {.callout-note title="Final Remarks"}
+Considering there were not strong effects found in the chosen variables on exam scores when assessed through statistical tests. Frank Johnson high school should experiment with new variables to assess how the new variables may affect their student academic performance leading to the potential development of a initiative or investment in a program that will help the school support the improvement of their students.
+:::
